@@ -1,0 +1,31 @@
+.paginator {
+    display: block;
+}
+
+.paginator .pages {
+    position: relative;
+    overflow: hidden;
+}
+
+.paginator .page {
+    position: absolute;
+}
+
+
+
+.paginator.style-slide .pages {
+    overflow: hidden;
+}
+
+.paginator.style-slide .page {
+    transition: left 0.5s;
+    left: 0;
+}
+
+.paginator.style-slide .page.left {
+    left: -100%;
+}
+
+.paginator.style-slide .page.right {
+    left: 100%;
+}

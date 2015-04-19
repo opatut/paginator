@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Paginator</title>
+    <link rel="stylesheet" type="text/css" href="paginator.css">
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <meta name="viewport" content="initial-scale=1">
+</head>
+<body>
+    <header class="chapter">
+        <div class="container">
+            <h1>Paginator</h1>
+        </div>
+    </header>
+
+    <section class="introduction chapter">
+        <div class="container">
+            <h2>About Paginator</h2>
+
+            <p>
+                Paginator is a very simple jQuery addon that implements containers
+                with multiple "pages" (hence the name) of which one is always
+                active/shown, the others ususally hidden.
+            </p>
+
+            <p>
+                Paginator aims to be simple to use, rich in animations (page
+                transitions) while keeping variants on those easy to implement,
+                and basically an all-round tool for carousels or image galleries.
+            </p>
+
+            <p>
+                Paginator is <b>WIP</b>, please report any bugs on
+                <a href="https://github.com/opatut/paginator/issues">Github</a>.
+            </p>
+        </div>
+    </section>
+
+    <section class="introduction chapter">
+        <div class="container">
+            <h2>Download</h2>
+        </div>
+    </section>
+
+    <section class="chapter">
+        <div class="container">
+            <h2>CSS Transitions</h2>
+
+            <p>
+                The transision between pages can be soley defined using CSS classes.
+                There are a few basic classes that are applied to the page elements
+                depending on their current state:
+            </p>
+
+            <ul>
+                <li><code>left</code> page is left of current page</li>
+                <li><code>current</code> page is the current page</li>
+                <li><code>right</code> page is right of the current page</li>
+                <li><code>offset-1</code> page is direct neighbor of current page</li>
+                <li><code>offset-2</code> page is 2 pages away from the current page</li>
+                <li><code>offset-...</code> etc.</li>
+            </ul>
+
+            <ul class="classes">
+                <li>.left<br/>&hellip;</li>
+                <li>.left<br/>.offset-2</li>
+                <li>.left<br/>.offset-1</li>
+                <li>.current<br/>&nbsp;</li>
+                <li>.right<br/>.offset-1</li>
+                <li>.right<br/>.offset-2</li>
+                <li>.right<br/>&hellip;</li>
+            </ul>
+
+            <p>
+                This is very simple to implement, but does not work with
+                touch-and-drag for obvious reasons.
+            </p>
+
+            <section class="paginator style-slide" id="paginator-1">
+                <div class="pages">
+                    <img src="http://placehold.it/600x200.png" class="page page-simple">
+                    <article class="page page-simple">1</article>
+                    <article class="page page-simple">2</article>
+                    <article class="page page-simple">3</article>
+                    <article class="page page-simple">4</article>
+                    <article class="page page-simple">5</article>
+                </div>
+
+                <div class="actions">
+                    <button data-action="prev"><span class="entypo-left-open"></span></button>
+                    <button data-action="next"><span class="entypo-right-open"></span></button>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <section class="chapter">
+        <div class="container">
+            <h2>Javascript Transitions</h2>
+
+            <p>
+                Using a single function, a transformation can be implemented that
+                defines CSS properties for each page depending on its current offset.
+            </p>
+
+            <section class="paginator" id="paginator-2">
+                <div class="pages">
+                    <article class="page page-simple">1</article>
+                    <article class="page page-simple">2</article>
+                    <article class="page page-simple">3</article>
+                    <article class="page page-simple">4</article>
+                    <article class="page page-simple">5</article>
+                </div>
+
+                <div class="actions">
+                    <button data-action="prev"><span class="entypo-left-open"></span></button>
+                    <button data-action="next"><span class="entypo-right-open"></span></button>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <section class="chapter">
+        <div class="container">
+            <h2>Different Sizes</h2>
+
+            <section class="paginator style-slide" id="paginator-3">
+                <div class="pages">
+                    <article class="page page-simple" style="height: 300px;">1</article>
+                    <article class="page page-simple" style="height: 200px;">2</article>
+                    <article class="page page-simple" style="height: 250px;">3</article>
+                    <article class="page page-simple" style="height: 200px;">4</article>
+                    <article class="page page-simple" style="height: 150px;">5</article>
+                </div>
+
+                <div class="actions">
+                    <button data-action="prev"><span class="entypo-left-open"></span></button>
+                    <button data-action="next"><span class="entypo-right-open"></span></button>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <section class="chapter">
+        <div class="container">
+            <h2>Code Interaction</h2>
+
+            <div class="form-group">
+                <label>Set pageTransform programmatically</label>
+                <select id="page-transform-select">
+                    <option key="slide">slide</option>
+                    <option key="slideVertical">slideVertical</option>
+                    <option key="fade">fade</option>
+                    <option key="stack">stack</option>
+                    <option key="zoom">zoom</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Go to page / onPageChanged</label>
+                <select id="page-select">
+                    <option key="1">1</option>
+                    <option key="2">2</option>
+                    <option key="3">3</option>
+                    <option key="4">4</option>
+                    <option key="5">5</option>
+                </select>
+            </div>
+
+            <section class="paginator" id="paginator-4">
+                <div class="pages">
+                    <article class="page page-simple">1</article>
+                    <article class="page page-simple">2</article>
+                    <article class="page page-simple">3</article>
+                    <article class="page page-simple">4</article>
+                    <article class="page page-simple">5</article>
+                </div>
+
+                <div class="actions">
+                    <button data-action="prev"><span class="entypo-left-open"></span></button>
+                    <button data-action="next"><span class="entypo-right-open"></span></button>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <a href="https://github.com/opatut/paginator"><img style="position: fixed; top: 0; right: 0; border: 0; z-index: 1000;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="paginator.jquery.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+</body>
+</html>
