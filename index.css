@@ -44,6 +44,18 @@ select {
     padding: 0 8px;
 }
 
+a[download] {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #666;
+    text-decoration: none;
+    color: white;
+}
+
+a[download]:hover {
+    background: #888;
+}
+
 
 .paginator {
     position: relative;
