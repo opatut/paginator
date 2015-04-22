@@ -1,4 +1,51 @@
+var makeSubscribable = function (events, obj) {
+    if (typeof obj === 'undefined') {
+        obj = {};
+    }
+
+    var subscribers = {};
+
+    for (i in events) {
+        subscribers[events[i]] = [];
+    }
+
+    obj.on = function (event, callback) {
+        // check if event is valid event
+        if (events.indexOf(event) === -1) {
+            throw new Error("Invalid event: " + event);
+        }
+
+        subscribers[event].push(callback);
+
+        return obj;
+    };
+
+    obj.off = function (event, callback) {
+        subscribers[event] = subscribers[event].filter(function (fn) {
+            return fn != callback;
+        });
+
+        return obj;
+    };
+
+    obj.handleEvent = function (event, arguments) {
+        for (i in subscribers[event]) {
+            subscribers[event][i].apply(obj, arguments);
+        };
+
+        return obj;
+    };
+
+    return obj;
+};
+
+var clamp = function (val, min, max) {
+    return Math.min(Math.max(min, val), max);
+};
+
 $.fn.paginator = function (options) {
+    var paginator = makeSubscribable(['pageChanged']);
+
     var $node           = $(this);
     var $pagesContainer = $node.find('.pages');
     var $pages          = $pagesContainer.children();
@@ -104,18 +151,8 @@ $.fn.paginator = function (options) {
             draggingTime = new Date();
             draggingPosition = newPosition;
 
-            var overshoot = function (distance) {
-                return 1 - 1 / distance;
-            };
-
-            if (draggingPosition < 0) {
-                draggingPosition = -(overshoot(-draggingPosition));
-            }
-
-            var c = getPageCount() - 1;
-            if (draggingPosition > c) {
-                draggingPosition = c-(overshoot(c-draggingPosition));
-            }
+            // TODO: overshoot
+            draggingPosition = clamp(draggingPosition, 0, getPageCount() - 1);
 
             updateStyles(draggingPosition, 0);
         }
@@ -156,15 +193,8 @@ $.fn.paginator = function (options) {
     var setCurrentPage = function (index, animateDuration) {
         var count = getPageCount();
 
-        // clamp right side
-        if (index > count - 1) {
-            index = count - 1;
-        }
-
-        // clamp left side
-        if (index < 0) {
-            index = 0;
-        }
+        // clamping
+        index = clamp(index, 0, count - 1);
 
         currentIndex = index;
         $currentPage = $pages.eq(currentIndex);
@@ -172,15 +202,29 @@ $.fn.paginator = function (options) {
         updateStyles(currentIndex, animateDuration);
         updateSize(animateDuration);
 
-        options.onPageChanged(currentIndex, $currentPage);
+        paginator.handleEvent('pageChanged', [currentIndex, $currentPage]);
     };
 
     var next = function () {
-        return setCurrentPage(currentIndex + 1);
+        var newIndex = currentIndex + 1;
+        var count = getPageCount();
+
+        if (options.rewind) {
+            newIndex = (newIndex + count) % count;
+        }
+
+        return setCurrentPage(newIndex);
     };
 
     var prev = function () {
-        return setCurrentPage(currentIndex - 1);
+        var newIndex = currentIndex - 1;
+        var count = getPageCount();
+
+        if (options.rewind) {
+            newIndex = (newIndex + count) % count;
+        }
+
+        return setCurrentPage(newIndex);
     };
 
     // initialize
@@ -240,12 +284,14 @@ $.fn.paginator = function (options) {
         updateStyles(currentIndex, 0);
     };
 
-    return {
-        setCurrentPage: setCurrentPage,
-        setPageTransform: setPageTransform,
-        prev: prev,
-        next: next
-    };
+
+    // add functions to paginator object
+    paginator.setCurrentPage = setCurrentPage;
+    paginator.setPageTransform = setPageTransform;
+    paginator.prev = prev;
+    paginator.next = next;
+
+    return paginator;
 }
 
 $.fn.paginator.defaults = {
@@ -254,9 +300,8 @@ $.fn.paginator.defaults = {
     animateDuration: 500,
     dragEnabled: true,
     dragDistancePerPage: 'auto',
-    onPageChanged: function (index, $page) {
-    },
     pageTransform: null,
+    rewind: false,
     pageTransformArgs: []
 };
 

@@ -1,6 +1,7 @@
 $(document).ready(function () {
     var p1 = $('#paginator-1').paginator({
-        dragEnabled: false
+        dragEnabled: false,
+        rewind: true
     });
 
     var p2 = $('#paginator-2').paginator({
@@ -10,10 +11,11 @@ $(document).ready(function () {
     var p3 = $('#paginator-3').paginator();
 
     var p4 = $('#paginator-4').paginator({
-        pageTransform: "slide",
-        onPageChanged: function (idx) {
-            $("#page-select").val(idx + 1);
-        }
+        pageTransform: "slide"
+    });
+
+    p4.on('pageChanged', function (idx) {
+        $("#page-select").val(idx + 1);
     });
 
     $("#page-transform-select").change(function () {
