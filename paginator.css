@@ -5,27 +5,39 @@
 .paginator .pages {
     position: relative;
     overflow: hidden;
+    width: 100%;
 }
 
 .paginator .page {
     position: absolute;
 }
 
-
-
-.paginator.style-slide .pages {
-    overflow: hidden;
+.paginator.autosize .page.current {
+    position: relative;
 }
 
-.paginator.style-slide .page {
-    transition: left 0.5s;
-    left: 0;
+.paginator .page.left, .paginator .page.right {
+    pointer-events: none;
 }
 
-.paginator.style-slide .page.left {
-    left: -100%;
-}
 
-.paginator.style-slide .page.right {
-    left: 100%;
-}
+/* Style: Instantly */
+.paginator.style-instant .page          { display: none; }
+.paginator.style-instant .page.current  { display: block; }
+
+/* Style: Slide */
+.paginator.style-slide .page        { left: 0; }
+.paginator.style-slide .page.left   { left: -100%; }
+.paginator.style-slide .page.right  { left: 100%; }
+
+/* Style: Slide and Fade */
+.paginator.style-slide-fade .page           { left: 0; opacity: 0; }
+.paginator.style-slide-fade .page.current   { opacity: 1; }
+.paginator.style-slide-fade .page.left      { left: -20%; }
+.paginator.style-slide-fade .page.right     { left: 20%; }
+
+/* Style: Fade */
+.paginator.style-fade .page           { opacity: 0; }
+.paginator.style-fade .page.current   { opacity: 1; }
+
+

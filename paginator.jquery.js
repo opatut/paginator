@@ -44,10 +44,10 @@ var clamp = function (val, min, max) {
 };
 
 $.fn.paginator = function (options) {
-    var paginator = makeSubscribable(['pageChanged']);
+    var paginator = makeSubscribable(['pageChanged', 'offsetChanged']);
 
     var $node           = $(this);
-    var $pagesContainer = $node.find('.pages');
+    var $pagesContainer = $node.find('.pages').eq(0);
     var $pages          = $pagesContainer.children();
 
     if (typeof options == 'undefined') {
@@ -107,9 +107,55 @@ $.fn.paginator = function (options) {
             $page.toggleClass('right', classOffset > 0);
             $page.addClass('offset-' + Math.abs(classOffset));
         });
+
+        // calculate factors on 'how much' each page is shown
+        var pageFactors = [];
+
+        for (var i = 0; i < getPageCount(); ++i) {
+            pageFactors.push(Math.max(0, 1 - Math.abs(i - progress)));
+        }
+
+        paginator.handleEvent('offsetChanged', [progress, pageFactors]);
+    };
+
+    var linkNavigationList = function ($listItems, currentClass, events) {
+        if (typeof currentClass === 'undefined') {
+            currentClass = 'current';
+        }
+
+        if (typeof events === 'undefined') {
+            events = 'click';
+        }
+
+        // function to assign currentClass to the currently active navigation item
+        var update = function (index) {
+            $listItems.removeClass(currentClass).eq(index).addClass(currentClass);
+        };
+
+        paginator.on('pageChanged', update);
+        update(currentIndex);
+
+        // bind click events for links/buttons inside items
+        if (events !== false) {
+            $listItems.each(function (idx) {
+                var onClick = function (e) {
+                    setCurrentPage(idx);
+                    e.preventDefault();
+                    e.stopPropagation();
+                };
+
+                $(this).find('a, button').on(events, onClick);
+                $(this).on(events, onClick);
+            });
+        }
     };
 
     var updateSize = function (animateDuration) {
+        // ignore this function call in 'autosize' mode (CSS only)
+        if ($node.hasClass('autosize')) {
+            return;
+        }
+
         if (typeof animateDuration === 'undefined') {
             animateDuration = options.animateDuration;
         }
@@ -159,9 +205,11 @@ $.fn.paginator = function (options) {
     };
 
     var stopDragging = function (pageX) {
-        if (typeof draggingPosition != 'undefined') {
+        if (typeof draggingPosition !== 'undefined') {
             // trigger an update to fix velocity
-            updateDragging(pageX);
+            if (typeof pageX !== 'undefined') {
+                updateDragging(pageX);
+            }
 
             var page = Math.round(draggingPosition);
             page = Math.min(getPageCount() - 1, Math.max(0, page));
@@ -190,11 +238,21 @@ $.fn.paginator = function (options) {
         }
     };
 
+    var getCurrentPage = function () {
+        return currentIndex;
+    }
+
     var setCurrentPage = function (index, animateDuration) {
         var count = getPageCount();
 
         // clamping
         index = clamp(index, 0, count - 1);
+
+        if (typeof options.allowPageChange === 'function' ?
+                !options.allowPageChange(currentIndex, index) :
+                !options.allowPageChange) {
+            return false;
+        }
 
         currentIndex = index;
         $currentPage = $pages.eq(currentIndex);
@@ -233,6 +291,12 @@ $.fn.paginator = function (options) {
     // bind actions on elements inside paginator node
     if (options.bindActions) {
         $node.find("[data-action]").click(function(e) {
+            // make sure $(this) is not inside a nested paginator
+            if (!$(this).parents('.paginator').eq(0).is($node)) {
+                return;
+            }
+
+
             var action = $(this).attr("data-action");
 
             if (action == "prev") {
@@ -240,6 +304,21 @@ $.fn.paginator = function (options) {
                 e.preventDefault();
             } else if (action == "next") {
                 next();
+                e.preventDefault();
+            } else if (action == "setCurrentPage" || action == "setPage") {
+                var target = $(this).data('page');
+
+                if (target == "last") {
+                    target = getPageCount();
+                } else if (target == "first") {
+                    target = 0;
+                } else if (target < 0) {
+                    target = getPageCount() + target;
+                } else {
+                    target = 0 + target; // convert to integer
+                }
+
+                setCurrentPage(target);
                 e.preventDefault();
             }
         });
@@ -255,7 +334,7 @@ $.fn.paginator = function (options) {
         });
 
         $('body').on('touchend', function(e) {
-            stopDragging(e.originalEvent.touches[0].pageX);
+            stopDragging();
         });
 
         $pagesContainer.on('mousedown', function(e) {
@@ -286,10 +365,14 @@ $.fn.paginator = function (options) {
 
 
     // add functions to paginator object
+    paginator.updateSize = updateSize;
     paginator.setCurrentPage = setCurrentPage;
+    paginator.getCurrentPage = getCurrentPage;
+    paginator.getPageCount = getPageCount;
     paginator.setPageTransform = setPageTransform;
     paginator.prev = prev;
     paginator.next = next;
+    paginator.linkNavigationList = linkNavigationList;
 
     return paginator;
 }
@@ -302,7 +385,8 @@ $.fn.paginator.defaults = {
     dragDistancePerPage: 'auto',
     pageTransform: null,
     rewind: false,
-    pageTransformArgs: []
+    pageTransformArgs: [],
+    allowPageChange: true
 };
 
 $.fn.paginator.transforms = {
